@@ -2,7 +2,10 @@
 	<head>
 		<script src="jquery/jquery-2.1.1.js"></script>
 		<script>
+			
+			// guarda a info XML
 			var geoXML;
+			
 			$.ajax({
 				url : "geo.xml",
 				async : false,
@@ -17,43 +20,60 @@
 				
 				// registar evento de reset
 				$("#hf").bind("reset", initSelectAll);
-				$("select").change(function () {alert("ola")});
+				$("#hf").submit(function (event) {
+					selectedC = $("#isel_country").find(":selected").attr("value");
+					//alert(selectedC);
+					
+					if (selectedC) {
+						$("#hf").submit();
+					} 
+					event.preventDefault();
+				})
 				// inicializar os selects
 				initSelectAll();
-				continents = $(geoXML).find("continent");
-				loadSelect("#isel_continent",continents);
+				
+				//$("select").change(function () {alert("ola")});
+				$("#isel_continent").change(loadRegions);
+				$("#isel_region").change(loadCountries);
+				
+				loadContinents();
+
 				
 				//regions = findRegions("1");
 				//loadSelect("#isel_region",regions);
 				
 				//countries = findCountries("1_2");
 				//countries = findX("region","country","1_2");
-				loadSelect("#isel_country",countries);
+				//loadSelect("#isel_country",countries);
 				//debugger;
 			});
 			
-			function findContinents() {
-				return $(geoXML).find("continent");
+			function loadContinents() {
+				initSelect("#isel_region");
+				initSelect("#isel_country");
+				continents = $(geoXML).find("geo>continent");	
+				loadSelect("#isel_continent",continents);
 			}
 			
-			
-			function findX(parentname,childname,id) {
-				key = "[id='"+id+"']";
-				return $(geoXML).find(parentname).filter(key).children(childname);
+			function loadRegions() {
+				initSelect("#isel_country");
+				id_selected = $("#isel_continent").children(":selected").attr("value");
+				filterS = "[id='"+id_selected+"']";
+				regions = $(geoXML).find("geo>continent").filter(filterS).children("region");	
+				loadSelect("#isel_region",regions);
 			}
 			
-			function findRegions(id_continent) {
-				key = "[id='"+id_continent+"']";
-				return $(geoXML).find("continent").filter(key).children("region");
+			function loadCountries() {
+				id_selected = $("#isel_region").children(":selected").attr("value");
+				filterS = "[id='"+id_selected+"']"
+				countries = $(geoXML).find("region").filter(filterS).children("country");	
+				loadSelect("#isel_country",countries);
 			}
-			
-			function findCountries(id_region) {
-				key = "[id='"+id_region+"']";
-				return $(geoXML).find("region").filter(key).children("country");
-			}
-			
+
+
 			function loadSelect(id,XMLDataCol) {
 				$(id).empty();
+				$(id).append($("<option/>").attr("disabled","disabled").attr("selected","selected").text("Select..."));
 				$(XMLDataCol).each(function (idx,node) {
 					info_id = $(node).attr("id");
 					info_name = $(node).children("name").text();
@@ -63,7 +83,7 @@
 			
 			function initSelect(id) {
 				$(id).empty();
-				$(id).append($("<option/>").text("Loading ...").attr("disabled","disabled"));
+				$(id).append($("<option/>").text("Waiting ...").attr("disabled","disabled"));
 			}
 			
 			function initSelectAll() {
