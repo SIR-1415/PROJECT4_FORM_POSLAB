@@ -1,0 +1,96 @@
+<html>
+	<head>
+		<script src="jquery/jquery-2.1.1.js"></script>
+		<script>
+			var geoXML;
+			$.ajax({
+				url : "geo.xml",
+				async : false,
+				type : "GET",
+				datatype : "xml",
+				success : function (dataXML) {
+					geoXML = dataXML;
+				}
+			});
+			//alert(geoXML);
+			$(document).ready(function () {
+				
+				// registar evento de reset
+				$("#hf").bind("reset", initSelectAll);
+				$("select").change(function () {alert("ola")});
+				// inicializar os selects
+				initSelectAll();
+				continents = $(geoXML).find("continent");
+				loadSelect("#isel_continent",continents);
+				
+				//regions = findRegions("1");
+				//loadSelect("#isel_region",regions);
+				
+				//countries = findCountries("1_2");
+				//countries = findX("region","country","1_2");
+				loadSelect("#isel_country",countries);
+				//debugger;
+			});
+			
+			function findContinents() {
+				return $(geoXML).find("continent");
+			}
+			
+			
+			function findX(parentname,childname,id) {
+				key = "[id='"+id+"']";
+				return $(geoXML).find(parentname).filter(key).children(childname);
+			}
+			
+			function findRegions(id_continent) {
+				key = "[id='"+id_continent+"']";
+				return $(geoXML).find("continent").filter(key).children("region");
+			}
+			
+			function findCountries(id_region) {
+				key = "[id='"+id_region+"']";
+				return $(geoXML).find("region").filter(key).children("country");
+			}
+			
+			function loadSelect(id,XMLDataCol) {
+				$(id).empty();
+				$(XMLDataCol).each(function (idx,node) {
+					info_id = $(node).attr("id");
+					info_name = $(node).children("name").text();
+					$(id).append($("<option/>").text(info_name).attr("value",info_id));
+				})
+			}
+			
+			function initSelect(id) {
+				$(id).empty();
+				$(id).append($("<option/>").text("Loading ...").attr("disabled","disabled"));
+			}
+			
+			function initSelectAll() {
+				initSelect("#isel_continent");
+				initSelect("#isel_region");
+				initSelect("#isel_country");
+			}
+			
+		</script>
+		
+	</head>
+	<body>
+		<form id="hf" method="get" action="dump.php">
+			<select id="isel_continent" name="continent">
+				
+			</select>
+			<br/>
+			<select id="isel_region" name="region">
+				
+			</select>
+			<br/>
+			<select id="isel_country" name="country">
+				
+			</select>
+			<br/>
+			<input type="submit"/>
+			<input type="reset"/>
+		</form>
+	</body>
+</html>
